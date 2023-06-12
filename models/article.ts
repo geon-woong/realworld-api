@@ -1,6 +1,7 @@
 import Sequelize, {
     Model, CreationOptional, InferAttributes, InferCreationAttributes,
 } from "sequelize";
+import User from "./user";
 
 class Article extends Model<InferAttributes<Article>, InferCreationAttributes<Article>> {
     declare id: CreationOptional<number>
@@ -37,7 +38,7 @@ class Article extends Model<InferAttributes<Article>, InferCreationAttributes<Ar
      }
 
      static associate() {
-
+        Article.belongsTo(User);
      };
 
 }

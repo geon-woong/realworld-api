@@ -1,6 +1,7 @@
 import Sequelize,{
     Model, CreationOptional, InferAttributes, InferCreationAttributes,
 } from "sequelize";
+import Article from "./article";
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>>{
     declare id: CreationOptional<number>
@@ -56,7 +57,19 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>>{
         });
     }
 
-    static associate() {}
+    static associate() {
+        User.hasMany(Article)
+        User.belongsToMany(User, {
+            foreignKey: 'followingId',
+            as: 'Followers',
+            through: 'Follow'
+        });
+        User.belongsToMany(User,{
+            foreignKey: 'followerId',
+            as: 'Followings',
+            through: 'Follow',
+        })
+    }
 };
 
 export default User;
