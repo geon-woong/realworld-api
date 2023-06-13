@@ -8,9 +8,12 @@ import morgan from 'morgan';
 import session from 'express-session';
 import dotenv from 'dotenv'
 import { sequelize } from './models';
+import passportConfig from './passport';
+import passport from 'passport';
 
 dotenv.config();
 const app = express();
+passportConfig();
 app.set('port', process.env.PORT || 8001);
 app.use(routes);
 
@@ -28,6 +31,8 @@ app.use(session({
         secure: false,
     },
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 sequelize.sync({ force: false })
     .then(() => {
