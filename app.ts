@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {ErrorRequestHandler} from 'express';
 import swaggerUi from 'swagger-ui-express'
 import YAML from 'yamljs'
 import path from 'path';
@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import session from 'express-session';
 import dotenv from 'dotenv'
+import { sequelize } from './models';
 
 dotenv.config();
 const app = express();
@@ -28,6 +29,14 @@ app.use(session({
     },
 }));
 
+sequelize.sync({ force: false })
+    .then(() => {
+        console.log('DB connected');
+    })
+    .catch((err) => {
+        console.error(err);
+    })
+
 const swaggerSpec = YAML.load(path.join(__dirname, './swagger.yaml'))
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
@@ -35,3 +44,20 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 app.listen(app.get('port'), () => {
     console.log('listening 8001');
 });
+
+
+app.use((req, res, next) => {
+    const error =  new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
+    error.status = 404;
+    next(error);
+  });
+  
+  const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+    console.error(err);
+    res.locals.message = err.message;
+    res.locals.error = process.env.NODE_ENV !== 'production' ? err : {};
+    res.status(err.status || 500);
+    res.render('error');
+  };
+  
+  app.use(errorHandler);
