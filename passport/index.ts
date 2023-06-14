@@ -1,6 +1,5 @@
 import passport from "passport";
 import local from './localStrategy';
-
 import User from "../models/user";
 
 export default () => {
