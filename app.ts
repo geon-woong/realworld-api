@@ -10,11 +10,18 @@ import dotenv from 'dotenv'
 import { sequelize } from './models';
 import passportConfig from './passport';
 import passport from 'passport';
+import nunjucks from 'nunjucks';
 
 dotenv.config();
 const app = express();
 passportConfig();
 app.set('port', process.env.PORT || 8001);
+app.set('view engine', 'html');
+nunjucks.configure('views', {
+  express: app,
+  watch: true,
+});
+
 app.use(routes);
 
 app.use(morgan('dev'));
@@ -46,10 +53,6 @@ const swaggerSpec = YAML.load(path.join(__dirname, './swagger.yaml'))
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-app.listen(app.get('port'), () => {
-    console.log('listening 8001');
-});
-
 
 app.use((req, res, next) => {
     const error =  new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
@@ -57,12 +60,4 @@ app.use((req, res, next) => {
     next(error);
   });
   
-  const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-    console.error(err);
-    res.locals.message = err.message;
-    res.locals.error = process.env.NODE_ENV !== 'production' ? err : {};
-    res.status(err.status || 500);
-    res.render('error');
-  };
-  
-  app.use(errorHandler);
+export default app;
